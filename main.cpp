@@ -1,4 +1,5 @@
 #include <boost/asio.hpp>
+#include <boost/beast.hpp>
 #include <iostream>
 #include <string_view>
 
@@ -6,18 +7,21 @@ using namespace boost::asio;
 
 int main()
 {
-    // Creates the Server's endpoint
+    // Creates the Server's endpoint (ip + port)
     ip::address_v4 ipv4 { boost::asio::ip::make_address_v4("127.0.0.1") };
     ip::port_type portNumber { 8080 };
     ip::tcp::endpoint endpoint { ipv4, portNumber };
 
+    // Context necessary for boost::asio
     io_context ioContext {};
     
-    // This object needs to be created to listen for new connections.
+    // This object needs to be created so the server can listen for new connections.
     ip::tcp::acceptor myAcceptor { ioContext, endpoint };
+    // Add a rule to the acceptor
     myAcceptor.set_option(ip::tcp::acceptor::reuse_address(true));
     myAcceptor.listen();
 
+    // Using as ignore error for now
     boost::system::error_code errorCode {};
 
     // Buffer that will be sent to clients
@@ -51,7 +55,6 @@ int main()
 
         const char* p1 = static_cast<const char*>(bufferData.data());
 
-
         std::string_view sv { p1, bufferSize };
 
         std::cout << sv << std::endl;
@@ -67,7 +70,7 @@ int main()
 
 
 
-        
+        clientSocket.close();
     }
     
     return 0;
